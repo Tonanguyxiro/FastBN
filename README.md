@@ -37,6 +37,8 @@ cmake -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=OFF ..
 make
 ```
 
+On Linux you can use `ls /bin | grep g++` to see the availble g++ and use `-DCMAKE_CXX_COMPILER=g++-9` to configure.
+
 On Mac OS, the default compiler (clang) needs to be changed to g++. (You can use ```ls /usr/local/bin | grep g++``` to check the compiler. Mine is ```g++-9```.)
 ```
 mkdir build
