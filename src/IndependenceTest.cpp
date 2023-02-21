@@ -3,6 +3,7 @@
 //
 
 #include "IndependenceTest.h"
+#include "mpi.h"
 
 /**
  * @brief: constructing a test using the given data set and significance level
