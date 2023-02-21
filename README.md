@@ -33,9 +33,10 @@ Build the project: Create a directory ```build``` under the root directory. Gene
 ```
 mkdir build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=OFF ..
+cmake -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=OFF ..
 make
 ```
+
 
 On Linux you can use `ls /bin | grep g++` to see the availble g++ and use `-DCMAKE_CXX_COMPILER=g++-9` to configure.
 
@@ -68,6 +69,15 @@ Please use the following command line options when running the executable file:
 - ```-f3```: provide relative path of testing set file (in LIBSVM format), default ```alarm/testing_alarm_1k_p20``` [used in inference]
 - ```-f4```: provide relative path of reference potential table file, default ```alarm/alarm_1k_pt``` [used in inference]
 
+### Build and Use with MPI
+```
+mkdir build
+cd build
+cmake -DCMAKE_CXX_COMPILER=mpic++ -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=OFF ..
+make
+```
+
+Run with `mpiexec -n 2 ./BayesianNetwork -a 0`
 
 
 ## How to cite our papers
