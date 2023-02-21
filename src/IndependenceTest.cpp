@@ -64,6 +64,7 @@ IndependenceTest::Result IndependenceTest::IndependenceResult(int x_idx, int y_i
  * it first computes the counts by scanning the complete data set to fill up a contingency table / cell table
  */
 IndependenceTest::Result IndependenceTest::ComputeGSquareXYZ(int x_idx, int y_idx, const vector<int> &z, Timer *timer) {
+    cout << "ComputeGSquareXYZ" << endl;
     int dimx = dataset->num_of_possible_values_of_disc_vars[x_idx];
     int dimy = dataset->num_of_possible_values_of_disc_vars[y_idx];
 
@@ -154,6 +155,34 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXYZ(int x_idx, int y_id
 //    timer->Stop("new & delete");
 
     bool indep = (p_value > alpha);
+    
+    // /* MPI Trial Version*/
+    // bool indep;
+    // MPI_Status status;
+    
+    // if (rank == 0){
+    //     // Send value to another process
+    //     MPI_Send((void *)&p_value, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
+    //     MPI_Send((void *)&alpha, 1, MPI_INT, 1, 2, MPI_COMM_WORLD);
+    //     printf ("rank 0 send data to rank 1 \n");
+    //     MPI_Recv((void *)&indep, 1, MPI_INT, 1, 3, MPI_COMM_WORLD, &status);
+    //     printf ("rank 0 receive data from rank 1 \n");
+    // }
+    // else if (rank == 1){
+    //     MPI_Recv((void *)&p_value, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+    //     MPI_Recv((void *)&alpha, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+    //     printf ("rank 1 receive data from rank 0 \n");
+    //     MPI_Send((void *)&indep, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
+    //     printf ("rank 1 send data to rank 0 \n");
+    // }
+    // else {
+    //     print ("Rank %d is touching fish", rank);
+    // }
+	
+
+    // /* MPI Trial Version*/
+
+
     return IndependenceTest::Result(p_value, indep, 0);
 }
 
@@ -165,6 +194,7 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXYZ(int x_idx, int y_id
  */
 IndependenceTest::Result IndependenceTest::ComputeGSquareXYZGroup(int x_idx, int y_idx, const vector<int> &z,
                                                                   int c_size, Timer *timer) {
+    cout << "ComputeGSquareXYZGroup" << endl;
     int c_depth = z.size() / c_size; // compute which the level is currently
 
     int dimx = dataset->num_of_possible_values_of_disc_vars[x_idx];
@@ -296,6 +326,7 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXYZGroup(int x_idx, int
  * @param test_idx: x, y
  */
 IndependenceTest::Result IndependenceTest::ComputeGSquareXY(int x_idx, int y_idx, Timer *timer) {
+    cout << "ComputeGSquareXY" << endl;
     int dimx = dataset->num_of_possible_values_of_disc_vars[x_idx];
     int dimy = dataset->num_of_possible_values_of_disc_vars[y_idx];
 
@@ -367,7 +398,39 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXY(int x_idx, int y_idx
     SAFE_DELETE(table_2d);
 //    timer->Stop("new & delete");
 
-    bool indep = (p_value > alpha);
+    // bool indep = (p_value > alpha);
+
+    bool indep;
+    int num_procs;
+	int rank;
+    MPI_Comm_size (MPI_COMM_WORLD, &num_procs);
+	MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+
+    MPI_Status status;
+    
+    if (rank == 0){
+        // Send value to another process
+        MPI_Send((void *)&p_value, 1, MPI_INT, 1, 1, MPI_COMM_WORLD);
+        MPI_Send((void *)&alpha, 1, MPI_INT, 1, 2, MPI_COMM_WORLD);
+        printf ("rank 0 send data to rank 1 \n");
+        MPI_Recv((void *)&indep, 1, MPI_INT, 1, 3, MPI_COMM_WORLD, &status);
+        printf ("rank 0 receive data from rank 1 \n");
+    }
+    else if (rank == 1){
+        MPI_Recv((void *)&p_value, 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+        MPI_Recv((void *)&alpha, 1, MPI_INT, 0, 2, MPI_COMM_WORLD, &status);
+        printf ("rank 1 receive data from rank 0 \n");
+        MPI_Send((void *)&indep, 1, MPI_INT, 0, 3, MPI_COMM_WORLD);
+        printf ("rank 1 send data to rank 0 \n");
+
+    }    
+    else {
+        printf ("Rank %d is touching fish", rank);
+    }
+	
+
+
+    
     return IndependenceTest::Result(p_value, indep);
 }
 /**----------------------------- implementations like bnlearn -----------------------------**/

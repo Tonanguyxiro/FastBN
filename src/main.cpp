@@ -12,12 +12,16 @@
 #include "BNSLComparison.h"
 #include "Parameter.h"
 
+#include "mpi.h"
+
 using namespace std;
 
 int main(int argc, char** argv) {
 
     Parameter param; // initialize parameters with default settings
     param.ParseParameters(argc, argv);
+
+    MPI_Init (NULL, NULL);
 
     if (param.algorithm == ALGPCSTABLE) {
 
@@ -196,7 +200,7 @@ int main(int argc, char** argv) {
         cout << "This function is under development" << endl;
     }
 
-
+    MPI_Finalize();
     return 0;
 }
 
