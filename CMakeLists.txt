@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 14)
 #set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
 
-option(USE_MPI "option for mpi" OFF)
+option(USE_MPI "option for mpi" ON)
 if (USE_MPI)
     message("Use MPI")
     add_definitions(-DUSE_MPI)
