@@ -53,6 +53,7 @@ public:
     ~IndependenceTest();
 
     /**----------------------------- implementations like bnlearn -----------------------------**/
+
     Result IndependenceResult(int x_idx, int y_idx, const vector<int> &z, string metric, Timer *timer, int c_size = 1);
 
     Result ComputeGSquareXYZ(int x_idx, int y_idx, const vector<int> &z, Timer *timer);

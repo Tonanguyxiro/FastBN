@@ -4,6 +4,12 @@
 
 #include "PCStable.h"
 
+/**
+ *
+ * @param net The network we use to learn
+ * @param a
+ * @param d
+ */
 PCStable::PCStable(Network *net, double a, int d) {
     network = net;
     num_ci_test = 0;
@@ -15,6 +21,15 @@ PCStable::PCStable(Network *net, double a, int d) {
 PCStable::~PCStable() {
     SAFE_DELETE(network);
 }
+
+/**
+ * @brief The entrance of the PC Stable Algorithm
+ * @param dts Data set
+ * @param group_size
+ * @param num_threads
+ * @param print_struct
+ * @param verbose
+ */
 
 void PCStable::StructLearnCompData(Dataset *dts, int group_size, int num_threads, bool print_struct, bool verbose) {
     cout << "==================================================" << '\n'
@@ -46,6 +61,16 @@ void PCStable::StructLearnCompData(Dataset *dts, int group_size, int num_threads
     SAFE_DELETE(timer);
 }
 
+/**
+ * @brief Structure Learning By PC-Stable Algorithm
+ * @param dts
+ * @param num_threads
+ * @param group_size
+ * @param timer
+ * @param print_struct
+ * @param verbose
+ */
+
 void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_size,
                                      Timer *timer, bool print_struct, bool verbose) {
 
@@ -53,10 +78,10 @@ void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_si
          << "Generating undirected complete graph" << endl;
 
     timer->Start("pc-stable step 0");
+    //! Step 00: Generate undirected complete Graph, in this graph, each node is connected by undirected edge.
     network->GenerateUndirectedCompleteGraph();
-    /**
-     * it takes quite a long time for the original implementation
-     */
+
+    // * it takes quite a long time for the original implementation
 //    for (int i = 0; i < network->num_nodes; ++i) {
 //        for (int j = i + 1; j < network->num_nodes; ++j) {
 //            network->AddUndirectedEdge(i, j);
@@ -69,17 +94,24 @@ void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_si
          << "Begin finding the skeleton" << endl << "Level 0... " << endl;
 
     timer->Start("pc-stable step 1");
-
+    //! Step 01: determine the skeleton of the graph
+    /**
+     * The term skeleton means the underlying undirected graph of the learned network.
+     * This step is done by performing a large number of CI-Test.
+     * This step is the most time consuming
+     */
     for (int i = 0; i < network->num_nodes; ++i) { // find neighbor set of each node i
         map<int, double> adjacency;
         for (int j = 0; j < network->num_nodes; ++j) { // all nodes except for i itself are neighbors of i
-            if (i == j)
-                continue;
+            if (i == j) continue; // Except i itself
             adjacency.insert(make_pair(j, 1.0));
         }
-        network->adjacencies.insert(make_pair(i, adjacency));
+        network->adjacencies.insert(make_pair(i, adjacency)); // Add the adjacency of node i
     }
 
+    /**
+     *
+     */
 #pragma omp parallel for num_threads(num_threads)
     for (int i = 0; i < network->num_edges; ++i) {
         int node_idx1 = network->vec_edges[i].GetNode1()->GetNodeIndex();
@@ -93,6 +125,7 @@ void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_si
                  << ", conditioning sets of size 0." << endl;
         }
 
+        // * Apply CI-Test
         num_ci_test++;
         IndependenceTest *ci_test = new IndependenceTest(dts, alpha);
         IndependenceTest::Result result = ci_test->IndependenceResult(node_idx1, node_idx2, vector<int>(),
@@ -110,6 +143,7 @@ void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_si
             cout << " (p-value: " << result.p_value << ")." << endl;
         }
 
+        // * Delete the edge (if independent)
         if (!independent) { // the edge remains
             num_dependence_judgement++;
             //-------------------------------- heuristic ---------------------------------//
@@ -181,6 +215,7 @@ void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_si
          << "Begin orienting v-structure" << endl;
 
 //    timer->Start("pc-stable step 2");
+    //! Step 02: Identify the v-structures in the skeleton
     OrientVStructure();
 //    timer->Stop("pc-stable step 2");
 
@@ -189,6 +224,7 @@ void PCStable::StructLearnByPCStable(Dataset *dts, int num_threads, int group_si
          << "Begin orienting other undirected edges" << endl;
 
 //    timer->Start("pc-stable step 3");
+    //! Set directions for as many of the remaining undirected edges as possible by applying a set of rules called Meek rules
     OrientImplied();
 //    timer->Stop("pc-stable step 3");
 

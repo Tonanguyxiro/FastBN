@@ -66,6 +66,7 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXYZ(int x_idx, int y_id
     int dimx = dataset->num_of_possible_values_of_disc_vars[x_idx];
     int dimy = dataset->num_of_possible_values_of_disc_vars[y_idx];
 
+    //! Step 00: Initialise conditions
     vector<int> cond_dims;
     cond_dims.reserve(z.size());
     for (const auto &z_idx : z) {
@@ -73,6 +74,7 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXYZ(int x_idx, int y_id
         cond_dims.push_back(dim);
     }
 
+    //! Step 01: Create the contingency table
 //    timer->Start("new & delete");
     Counts3D *table_3d = new Counts3D(dimx, dimy, x_idx, y_idx, cond_dims, z);
 //    timer->Stop("new & delete");
@@ -296,12 +298,14 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXY(int x_idx, int y_idx
     int dimx = dataset->num_of_possible_values_of_disc_vars[x_idx];
     int dimy = dataset->num_of_possible_values_of_disc_vars[y_idx];
 
+    //! Step 01: Create the contingency table
 //    timer->Start("new & delete");
     Counts2D *table_2d = new Counts2D(dimx, dimy, x_idx, y_idx);
 //    timer->Stop("new & delete");
 
     table_2d->FillTable(dataset, timer);
 
+    //! Step 02:
 //    timer->Start("g2 & df + p value");
     double g2 = 0.0;
     int df = 0;
@@ -321,8 +325,10 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXY(int x_idx, int y_idx
     aly = (aly >= 1) ? aly : 1;
     df += (alx - 1) * (aly - 1);
 
+    //! Step 03: To get the distribution.
     long total = dataset->num_instance; // N_{++}
 //    int total = dataset->num_instance; // N_{++}
+    //? Why long and int?
 
     for (int i = 0; i < dimx; ++i) { // for each possible value of x
         long sum_row = table_2d->ni[i]; // N_{x+}
@@ -346,6 +352,7 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXY(int x_idx, int y_idx
         }
     }
 
+    //! Step 04: Judge and Report
     if (df == 0) { // if df == 0, this is definitely an independent table
         return IndependenceTest::Result(1.0, true);
     }
