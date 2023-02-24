@@ -73,7 +73,7 @@ Please use the following command line options when running the executable file:
 ```
 mkdir build
 cd build
-cmake -DCMAKE_CXX_COMPILER=mpic++ -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=OFF ..
+cmake -DCMAKE_CXX_COMPILER=mpic++ -DCMAKE_BUILD_TYPE=Release -DUSE_MPI=ON ..
 make
 ```
 
