@@ -5,6 +5,9 @@
 #include "IndependenceTest.h"
 #include "mpi.h"
 
+extern int num_procs;
+extern int rank;
+
 /**
  * @brief: constructing a test using the given data set and significance level
  * @param dataset: a data set consisting entirely of discrete variables
@@ -401,11 +404,6 @@ IndependenceTest::Result IndependenceTest::ComputeGSquareXY(int x_idx, int y_idx
     // bool indep = (p_value > alpha);
 
     bool indep;
-    int num_procs;
-	int rank;
-    MPI_Comm_size (MPI_COMM_WORLD, &num_procs);
-	MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-
     MPI_Status status;
     
     if (rank == 0){
