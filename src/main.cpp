@@ -16,12 +16,18 @@
 
 using namespace std;
 
+int num_procs;
+int rank;
+
 int main(int argc, char** argv) {
 
     Parameter param; // initialize parameters with default settings
     param.ParseParameters(argc, argv);
 
+    // Initialize MPI
     MPI_Init (NULL, NULL);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &nbTasks);
 
     if (param.algorithm == ALGPCSTABLE) {
 
@@ -200,6 +206,8 @@ int main(int argc, char** argv) {
         cout << "This function is under development" << endl;
     }
 
+    // Finilize MPI
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Finalize();
     return 0;
 }
